@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost:1433;databaseName=wms;trustServerCertificate=true
+    username: sa
+    password: 123456
+
+mybatis-plus:
+  configuration:
+    map-unders-to-camel-case: false
+  global-config:
+    db-config:
+      id-type: auto

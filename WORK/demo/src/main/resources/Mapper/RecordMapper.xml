@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.RecordMapper">
+
+    <select id="selectRecordPage" resultType="com.example.demo.entity.RecordRes">
+        SELECT
+            a.*,
+            ISNULL(b.name, '') AS goodsname,
+            ISNULL(c.name, '') AS storagename,
+            ISNULL(d.name, '') AS goodstypename,
+            ISNULL((SELECT TOP 1 u.name FROM sysuser u WHERE u.id = a.userId), '') AS username,
+            ISNULL((SELECT TOP 1 u.name FROM sysuser u WHERE u.id = a.adminId), '') AS adminname
+        FROM record a
+        LEFT JOIN goods b ON a.goods = b.id
+        LEFT JOIN systorage c ON b.storage = c.name
+        LEFT JOIN goodsType d ON b.goodsType = d.name
+        WHERE 1=1
+            <!-- 权限过滤：非超级管理员只能看自己 -->
+            <if test="query.userId != null">
+                AND a.userId = #{query.userId}
+            </if>
+
+            <!-- 仓库筛选 -->
+            <if test="query.storage != null and query.storage != ''">
+                AND c.name = #{query.storage}
+            </if>
+            <!-- 分类筛选 -->
+            <if test="query.goodsType != null and query.goodsType != ''">
+                AND d.name = #{query.goodsType}
+            </if>
+            <!-- 物品搜索 -->
+            <if test="query.name != null and query.name != ''">
+                AND b.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+        ORDER BY a.id DESC
+    </select>
+
+</mapper>

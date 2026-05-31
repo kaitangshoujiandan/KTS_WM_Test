@@ -1,0 +1,14 @@
+
+node_modules/
+dist/
+.vscode/
+.idea/
+
+target/
+*.class
+*.jar
+*.war
+
+*.log
+*.tmp
+.DS_Store
