@@ -7,4 +7,5 @@ import com.QueryPageParam;
 public interface UserService extends com.baomidou.mybatisplus.extension.service.IService<User> {
     IPage<User> listPage(QueryPageParam param);
     User findByNo(String no);
+    User authenticate(String userNo, String rawPassword);
 }

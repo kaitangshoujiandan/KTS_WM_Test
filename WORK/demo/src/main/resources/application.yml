@@ -5,6 +5,12 @@ spring:
     username: sa
     password: 123456
 
+jwt:
+  secret: dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIEpXVCB1c2FnZSBhbmQgaXQgc2hvdWxkIGJlIGxvbmcgZW5vdWdo
+  expiration: 3600000
+  header: Authorization
+  prefix: Bearer
+
 mybatis-plus:
   configuration:
     map-unders-to-camel-case: false

@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +12,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     @Override
     public IPage<User> listPage(QueryPageParam param) {
@@ -31,5 +38,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return new User();
     }
     return null;
-}
+    }
+    @Override
+    public User authenticate(String userNo, String rawPassword) {
+        // 1. 根据用户名查询用户（假设表名和字段名已经匹配）
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getNo, userNo);
+        User user = userMapper.selectOne(wrapper);
+
+        // 2. 明文比对（注意：数据库中密码目前是明文）
+        if (user != null && rawPassword.equals(user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
 }
