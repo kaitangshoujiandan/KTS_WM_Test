@@ -1,14 +1,21 @@
 package com.example.demo.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo.entity.LoginRequest;
 import com.example.demo.entity.LoginResponse;
+import com.example.demo.entity.Sysmenu;
 import com.example.demo.entity.User;
+import com.example.demo.service.SysmenuService;
 import com.example.demo.service.UserService;
 import com.example.demo.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,29 +25,39 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
+    private SysmenuService sysmenuService;   // 菜单服务
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // 1. 调用 Service 验证用户名和密码（明文比对）
+        // 1. 验证用户名密码（明文比对，适配你现在的数据库）
         User user = userService.authenticate(loginRequest.getNo(), loginRequest.getPassword());
-
-        // 2. 认证失败返回 401
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("账号或密码错误");
+            return ResponseEntity.status(401).body("用户名或密码错误");
         }
 
-        // 3. 认证成功，生成 JWT token
-        String token = jwtUtils.generateToken(Long.valueOf(user.getId()), user.getName());
+        // 2. 生成 JWT token
+        String token = jwtUtils.generateToken(Long.valueOf(user.getId()), user.getNo());  // 假设用户账号字段是 no
 
-        // 4. 返回 token 及用户信息（密码不要返回）
-        LoginResponse response = new LoginResponse(token, user.getName(), Long.valueOf(user.getId()));
-        return ResponseEntity.ok(response);
-    }
+        // 3. 查询菜单（复用旧登录逻辑）
+        List<Sysmenu> menuList = null;
+        if (sysmenuService != null && user.getRoleId() != null) {
+            // 根据角色ID查询菜单（和原来的写法一致）
+            menuList = sysmenuService.list(
+                    new LambdaQueryWrapper<Sysmenu>()
+                            .like(Sysmenu::getMenuRight, user.getRoleId())
+            );
+        }
 
-    // 可选：测试接口，验证 JWT 是否有效（需要带 token 访问）
-    @GetMapping("/test")
-    public String test() {
-        return "认证成功，Token 有效";
+        // 4. 封装返回数据（模仿旧接口的格式，方便前端不改）
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("user", user);
+        data.put("menuList", menuList);
+
+        // 如果你原来 Result 类有固定格式，可以改成 Result.success(data)
+        return ResponseEntity.ok(data);
     }
 }

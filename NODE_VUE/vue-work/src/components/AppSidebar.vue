@@ -31,13 +31,23 @@
 </template>
 
 <script setup>
-import { House, User, UserFilled, OfficeBuilding } from '@element-plus/icons-vue'
+import { House,} from '@element-plus/icons-vue'
 import { useCounterStore } from '@/stores/counter'
-import { computed } from 'vue'
+import { onMounted, computed } from 'vue'
 
 const counterStore = useCounterStore()
 const isCollapse = computed(() => counterStore.isCollapse)
 const menuList = computed(() => counterStore.menuList || [])
+// 新增：组件挂载优先从本地缓存补全Pinia用户数据
+onMounted(() => {
+  const userStr = localStorage.getItem('userInfo')
+  if (userStr) {
+    const user = JSON.parse(userStr)
+    // 强制写入pinia，保证当前组件能拿到roleId
+    counterStore.setUserInfo(user)
+    // 后续：用user.roleId去请求后端菜单接口 setMenuList
+  }
+})
 </script>
 
 <style scoped>

@@ -44,7 +44,7 @@ import { ElMessage } from 'element-plus'
 import { useCounterStore } from '@/stores/counter'
 
 const router = useRouter()
-const counterStore = useCounterStore() // 统一名称
+const counterStore = useCounterStore()
 
 const loginForm = ref({
   no: '',
@@ -58,32 +58,31 @@ const loginRules = {
 }
 
 const emit = defineEmits(['login-success'])
+
 const handleLogin = () => {
   loginFormRef.value.validate(async (valid) => {
     if (!valid) return
     try {
-      const res = await axios.post('http://localhost:8080/login', loginForm.value)
+      const res = await axios.post('http://localhost:8080/auth/login', {
+        no: loginForm.value.no,
+        password: loginForm.value.password,
+      })
 
-      if (res.data.code === 1) {
+      if (res.data.token) {
         ElMessage.success('登录成功！')
-
-        // 1. 保存用户信息到本地 + Pinia
-        const user = res.data.data.user
+        localStorage.setItem('jwt_token', res.data.token)
+        //直接保存后端全部用户信息
+        const user = res.data.user
         localStorage.setItem('userInfo', JSON.stringify(user))
         counterStore.setUserInfo(user)
-
-        // 2. 保存菜单
-        const menuList = res.data.data.menuList
-        counterStore.setMenu(menuList)
-
-        // 3. 跳转首页
+        counterStore.setMenu(res.data.menuList)
         router.push('/home')
         emit('login-success')
       } else {
-        ElMessage.error('登陆失败！')
+        ElMessage.error(res.data.message || '登录失败')
       }
     } catch (err) {
-      ElMessage.error('请求异常')
+      ElMessage.error('请求异常，请检查网络或后端')
       console.error(err)
     }
   })
