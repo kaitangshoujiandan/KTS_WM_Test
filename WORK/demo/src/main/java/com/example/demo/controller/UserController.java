@@ -71,29 +71,6 @@ public class UserController {
         return userService.removeById(user);
     }
 
-    // 登录
-//    @PostMapping("/login")
-//    public Result login(@RequestBody User user) {
-//        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-//        wrapper.eq(User::getNo, user.getNo());
-//        wrapper.eq(User::getPassword, user.getPassword());
-//        User result = userService.getOne(wrapper);
-//
-//        if (result != null) {
-//            LambdaQueryWrapper<Sysmenu> menuWrapper = new LambdaQueryWrapper<>();
-//            menuWrapper.like(Sysmenu::getMenuRight, result.getRoleId());
-//
-//            List<Sysmenu> menuList = sysmenuService.list(menuWrapper);
-//
-//            Map<String, Object> responseData = new HashMap<>();
-//            responseData.put("user", result);
-//            responseData.put("menuList", menuList);
-//
-//            return Result.success("登录成功！", responseData);
-//        } else {
-//            return Result.fail("登录失败！");
-//        }
-//    }
 
     // 分页查询（已修复）
     @PostMapping("/listpage")
